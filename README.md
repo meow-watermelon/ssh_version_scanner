@@ -22,5 +22,7 @@ SSH server sends out the server string ended with `0xD 0xA (\r\n)` immediately o
 `SSH-2.0-OpenSSH_8.1`
 
 *SSH*: server string prefix
+
 *2.0*: SSH protocol version
+
 *OpenSSH_8.1*: SSH server software name and version
