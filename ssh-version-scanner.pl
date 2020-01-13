@@ -9,6 +9,7 @@ use IO::Socket::IP qw(:DEFAULT :crlf);
 
 $/ = CRLF;
 my ($host, $port, $timeout) = (undef, 22, 5);
+my $ssh_version_string = undef;
 
 GetOptions(
     "host=s" => \$host,
@@ -43,8 +44,19 @@ my $sock = IO::Socket::IP->new(
     Timeout => $timeout,
 ) or die "$host - $port - ERROR - $!\n";
 
-chomp(my $ssh_version_string = $sock->getline);
+# set up 5 secs timeout timer: client timeouts if no response from the SSH server after TCP handshake is done
+eval {
+    local $SIG{ALRM} = sub { die "timeout\n" };
+    alarm(5);
+    chomp($ssh_version_string = $sock->getline);
+};
 
-print "$host - $port - $ssh_version_string\n";
+alarm(0);
+
+if ($@ =~ /timeout/) {
+    die "$host - $port - ERROR - Client Timeout\n";
+} else {
+    print "$host - $port - $ssh_version_string\n";
+}
 
 close $sock;
